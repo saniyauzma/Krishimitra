@@ -1,0 +1,178 @@
+"""
+Pinecone retrieval service with embedding functionality
+"""
+import time
+from typing import List, Dict, Any, Optional
+
+from pinecone import Pinecone
+
+from core.config import get_settings
+from core.logging import get_logger
+
+logger = get_logger(__name__)
+settings = get_settings()
+
+
+class RetrievalService:
+    """Handles document retrieval from Pinecone vector database"""
+    
+    def __init__(self):
+        self.pc = None
+        self.index = None
+        self.initialized = False
+        self._initialize()
+    
+    def _initialize(self):
+        """Initialize Pinecone client"""
+        try:
+            if not settings.pinecone_api_key or settings.pinecone_api_key.startswith("replace-with"):
+                raise ValueError("Pinecone API key is not configured. Set PINECONE_API_KEY in .env.")
+
+            # Initialize Pinecone with new API
+            self.pc = Pinecone(api_key=settings.pinecone_api_key)
+            
+            # Connect to existing index
+            existing_indexes = [idx.name for idx in self.pc.list_indexes()]
+            if settings.pinecone_index_name not in existing_indexes:
+                raise ValueError(f"Index '{settings.pinecone_index_name}' not found. Available indexes: {existing_indexes}")
+            
+            self.index = self.pc.Index(settings.pinecone_index_name)
+            self.initialized = True
+            
+            logger.info(f"Successfully connected to Pinecone index: {settings.pinecone_index_name}")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize retrieval service: {e}")
+            self.pc = None
+            self.index = None
+            self.initialized = False
+    
+    def retrieve_chunks(
+        self, 
+        query_embedding: List[float], 
+        top_k: int = None, 
+        filter_dict: Optional[Dict[str, Any]] = None
+    ) -> tuple[Dict[str, Any], float]:
+        """
+        Retrieve similar chunks from Pinecone using query embedding
+        
+        Args:
+            query_embedding: Query embedding vector
+            top_k: Number of results to return
+            filter_dict: Optional metadata filters
+            
+        Returns:
+            Tuple of (retrieval results, latency in ms)
+        """
+        if top_k is None:
+            top_k = settings.default_top_k
+        
+        top_k = min(top_k, settings.max_top_k)
+        
+        if not self.index:
+            raise RuntimeError(
+                "Pinecone retrieval is not initialized. "
+                "Check PINECONE_API_KEY and PINECONE_INDEX_NAME in backend/.env."
+            )
+
+            return processed_results, latency_ms
+            
+        except Exception as e:
+            logger.error(f"Error during retrieval: {e}")
+            raise
+    
+    def _process_search_results(self, search_results) -> Dict[str, Any]:
+        """
+        Process raw Pinecone search results
+        
+        Args:
+            search_results: Raw results from Pinecone query
+            
+        Returns:
+            Processed results with chunks and sources
+        """
+        chunks = []
+        sources = []
+        
+        for match in search_results.matches:
+            # Extract metadata
+            metadata = match.metadata or {}
+            
+            # Create chunk info
+            chunk_info = {
+                "id": match.id,
+                "text": metadata.get("text", ""),
+                "score": float(match.score),
+                "metadata": metadata
+            }
+            chunks.append(chunk_info)
+            
+            # Create source info
+            source_info = {
+                "source": metadata.get("filename", "unknown"),
+                "page": metadata.get("page", None),
+                "chunk_id": match.id,
+                "score": float(match.score)
+            }
+            sources.append(source_info)
+        
+        return {
+            "chunks": chunks,
+            "sources": sources
+        }
+    
+    async def get_index_stats(self) -> Dict[str, Any]:
+        """
+        Get Pinecone index statistics
+        
+        Returns:
+            Index statistics and information
+        """
+        if not self.index:
+            raise RuntimeError("Pinecone index is not initialized.")
+
+        try:
+            stats = self.index.describe_index_stats()
+            return {
+                "total_vectors": stats.total_vector_count,
+                "dimension": stats.dimension,
+                "index_fullness": stats.index_fullness,
+                "namespaces": dict(stats.namespaces) if stats.namespaces else {}
+            }
+        except Exception as e:
+            logger.error(f"Error getting index stats: {e}")
+            raise
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """
+        Perform health check on retrieval service
+        
+        Returns:
+            Health status information
+        """
+        if not self.initialized:
+            return {
+                "status": "disconnected",
+                "error": "Pinecone retrieval is not initialized."
+            }
+
+        try:
+            # Test Pinecone connection
+            stats = await self.get_index_stats()
+            
+            return {
+                "status": "connected",
+                "pinecone_index": settings.pinecone_index_name,
+                "total_vectors": stats["total_vectors"]
+            }
+            
+        except Exception as e:
+            logger.error(f"Health check failed: {e}")
+            return {
+                "status": "disconnected",
+                "error": str(e)
+            }
+
+
+# Global retrieval service instance
+retrieval_service = RetrievalService()
