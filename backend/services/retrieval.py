@@ -75,8 +75,28 @@ class RetrievalService:
                 "Check PINECONE_API_KEY and PINECONE_INDEX_NAME in backend/.env."
             )
 
+        try:
+            start_time = time.time()
+
+            search_results = self.index.query(
+                vector=query_embedding,
+                top_k=top_k,
+                include_metadata=True,
+                filter=filter_dict
+            )
+
+            processed_results = self._process_search_results(search_results)
+
+            latency_ms = (time.time() - start_time) * 1000
+
+            logger.log_node_execution(
+                node_name="RetrieveNode",
+                latency_ms=latency_ms,
+                metadata={"top_k": top_k, "num_results": len(processed_results.get("chunks", []))}
+            )
+
             return processed_results, latency_ms
-            
+
         except Exception as e:
             logger.error(f"Error during retrieval: {e}")
             raise
