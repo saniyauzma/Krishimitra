@@ -342,7 +342,13 @@ const DiseaseDetection: React.FC = () => {
   const [result, setResult] = useState<DetectionResult | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
-  const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+  const API_BASE =
+    import.meta.env.VITE_API_BASE ||
+    (typeof window !== "undefined"
+      ? window.location.hostname === "localhost"
+        ? "http://127.0.0.1:8000"
+        : `http://${window.location.hostname}:8000`
+      : "http://127.0.0.1:8000");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

@@ -19,7 +19,13 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [farmSize, setFarmSize] = useState("");
   const [selectedCrops, setSelectedCrops] = useState<string[]>([]);
-  const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+  const API_BASE =
+    import.meta.env.VITE_API_BASE ||
+    (typeof window !== "undefined"
+      ? window.location.hostname === "localhost"
+        ? "http://127.0.0.1:8000"
+        : `http://${window.location.hostname}:8000`
+      : "http://127.0.0.1:8000");
   const cropGroups: { label: string; items: string[] }[] = [
     { label: "Cereals", items: ["Rice (Paddy)", "Wheat", "Maize (Corn)", "Barley", "Sorghum (Jowar)", "Millet (Bajra, Ragi)", "Oats"] },
     { label: "Pulses/Legumes", items: ["Chickpea (Gram)", "Lentils (Masoor)", "Black Gram (Urad)", "Green Gram (Moong)", "Pigeon Pea (Tur/Arhar)", "Soybean", "Peas"] },
