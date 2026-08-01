@@ -1,32 +1,46 @@
 # Krishi Mitra
 
-Krishi Mitra is a fullstack agricultural assistant application with AI-powered RAG, crop prediction, disease detection, fertilizer recommendations, weather insights, and multilingual support.
+Krishi Mitra is a fullstack agricultural assistant application with AI-powered RAG, crop prediction, disease detection, fertilizer recommendations, weather insights, and multilingual UI support.
 
 ## Project structure
 
 - `backend/` — FastAPI backend with authentication, RAG, weather, crop prediction, fertilizer prediction, and crop disease endpoints.
-- `frontend/` — Vite + React TypeScript frontend with UI components, routing, localization, and dashboard pages.
+- `frontend/` — Vite + React TypeScript frontend with UI components, routing, and localization.
 
 ## Prerequisites
 
-- Python 3.11+ (or compatible Python 3.x)
-- Node.js 18+ / npm
+- Python 3.11+ or compatible Python 3.x
+- Node.js 18+ and npm
 - MongoDB running locally or a valid `MONGO_URL`
-- Optional: Pinecone and Gemini credentials for full RAG support
+- Optional: Pinecone and Gemini credentials for full RAG functionality
 
 ## Setup
 
-### 1. Backend
+### Backend
+
+1. Open a terminal and go to the backend folder:
 
 ```powershell
 cd backend
+```
+
+2. Create and activate a virtual environment:
+
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+3. Install Python dependencies:
+
+```powershell
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Create or update `backend/.env` with your local configuration. Example values:
+4. Create or update `backend/.env` with your local configuration.
+
+Example `backend/.env`:
 
 ```dotenv
 MONGO_URL=mongodb://localhost:27017/
@@ -59,10 +73,17 @@ ENABLE_GRAPH_LOGGING=true
 LOG_LEVEL=INFO
 ```
 
-### 2. Frontend
+### Frontend
+
+1. Open a second terminal and go to the frontend folder:
 
 ```powershell
 cd frontend
+```
+
+2. Install frontend dependencies:
+
+```powershell
 npm install
 ```
 
@@ -70,46 +91,49 @@ npm install
 
 ### Start backend
 
+In the backend terminal:
+
 ```powershell
 cd backend
 .\.venv\Scripts\Activate.ps1
 python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Then open:
+Open:
 
 - `http://127.0.0.1:8000`
 - `http://127.0.0.1:8000/docs`
 
 ### Start frontend
 
+In the frontend terminal:
+
 ```powershell
 cd frontend
 npm run dev -- --host 0.0.0.0
 ```
 
-Then open:
+Open:
 
 - `http://localhost:8080`
 
 ## Notes
 
-- The backend will fall back to an in-memory user store if MongoDB is unreachable, so auth may still work locally but data will not persist.
-- Keep `.env` and other secret files out of git. The repository `.gitignore` already excludes `.env`, `.venv/`, and other generated files.
-- `node_modules/` and `.venv/` are generated dependencies and should not be committed.
-- `package-lock.json` is optional for npm dependency locking.
+- `node_modules/` and `.venv/` are generated and should not be committed.
+- Do not commit `.env` files or other secrets.
+- `package-lock.json` is useful and can stay in the repo to lock dependency versions.
+- If MongoDB is unavailable, the backend may fall back to an in-memory user store, but auth data will not persist.
 
-## Known fixes and debugging notes
+## Common issues
 
-- `backend/requirements.txt` should be UTF-8 encoded to avoid install errors.
-- The backend may require a valid `MONGO_URL` in `backend/.env` for persistent auth data.
-- Local network access works when frontend runs with `--host 0.0.0.0` and backend binds to `0.0.0.0` or `127.0.0.1`.
+- If the frontend cannot reach the backend, verify the backend is running on `http://127.0.0.1:8000` and the frontend is configured to use that URL.
+- If translation language changes do not apply, make sure text is wrapped with `t('...')` keys and the locale files are present under `frontend/src/locales/`.
 
 ## Useful URLs
 
-- Frontend: `http://localhost:8080`
-- Backend: `http://127.0.0.1:8000`
-- API docs: `http://127.0.0.1:8000/docs`
+- Frontend app: `http://localhost:8080`
+- Backend API: `http://127.0.0.1:8000`
+- Swagger docs: `http://127.0.0.1:8000/docs`
 
 ## License
 

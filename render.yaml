@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: krishimitra-backend
+    env: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    buildCommand: null
+    startCommand: null
+    envVars:
+      - key: MONGO_URI
+        value: "<YOUR_MONGODB_ATLAS_URI>"
+    healthCheckPath: "/api/v1/rag/health"
