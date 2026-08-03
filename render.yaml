@@ -2,34 +2,53 @@ services:
   - type: web
     name: krishimitra-backend
     env: python
+    pythonVersion: "3.11"
     plan: free
     region: oregon
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
+    buildCommand: python -m pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /api/v1/rag/health
+    healthCheckPath: /
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
       - key: MONGO_URL
-        value: mongodb+srv://saniyauzma85_db_user:krishi123@cluster0.ya0cfzd.mongodb.net/krishimitra?retryWrites=true&w=majority&appName=Cluster0
+        sync: false
       - key: JWT_SECRET
-        value: SGhigIn01Pc93Ev30FTnN1353Oi0oA0saVvC1MBAfOL6A5jESk9s7s1d2qKlM_gjBuVxAbvzOMdI3fZsbrZD7A
+        sync: false
       - key: JWT_ALGORITHM
         value: HS256
-      - key: GEMINI_API_KEY
-        value: AIzaSyD6ZcbQSqE8wJd9nZhVxI1hWzTTiHK5XKc
+      - key: JWT_EXPIRE_MINUTES
+        value: "60"
       - key: PINECONE_API_KEY
-        value: pcsk_4jyofi_REVBd3Et97tPF6WAVupAZ8kLKCAvyHG2xfcEBaHrwL79k4e1k1pbiXid3Y6Yryi
+        sync: false
       - key: PINECONE_ENVIRONMENT
         value: us-east-1
       - key: PINECONE_INDEX_NAME
         value: krishimitra-knowledge
-      - key: OPENWEATHER_API_KEY
-        value: 28590542f832e6676af5c3e93bf8892b
-      - key: ALLOWED_ORIGINS
-        value: ""
       - key: EMBEDDING_MODEL_NAME
         value: sentence-transformers/all-mpnet-base-v2
       - key: EMBEDDING_DIMENSION
-        value: 768
+        value: "768"
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash-exp
+      - key: DEFAULT_TOP_K
+        value: "5"
+      - key: MAX_TOP_K
+        value: "20"
+      - key: MAX_TOKENS
+        value: "1000"
+      - key: TEMPERATURE
+        value: "0.7"
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: GRAPH_TIMEOUT
+        value: "30"
+      - key: ENABLE_GRAPH_LOGGING
+        value: "true"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: PYTHON_VERSION
+        value: "3.11"
