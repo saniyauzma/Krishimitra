@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: krishimitra-backend
+    name: krishimitra-api-v2
     env: python
     pythonVersion: "3.11"
     plan: free
