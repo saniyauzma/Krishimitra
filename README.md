@@ -126,13 +126,8 @@ OPENWEATHER_API_KEY=your_openweather_api_key
 GRAPH_TIMEOUT=30
 ENABLE_GRAPH_LOGGING=true
 LOG_LEVEL=INFO
-```
 
-For frontend deployments, set the following environment variable to override the default local backend URL:
-
-```dotenv
-VITE_API_BASE=https://krishimitra-server.onrender.com
-```
+For production frontend deployments, set the `VITE_API_BASE` environment variable in your hosting platform to point to the deployed backend URL.
 
 ## License
 
